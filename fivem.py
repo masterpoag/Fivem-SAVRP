@@ -4,6 +4,9 @@ import time
 from typing import Dict
 import queue
 
+""" Refactored ConnectionManager taken from github https://github.com/josh-tf/fxcommands/ 
+"""
+
 class ConnectionManager:
     """Python equivalent of the C# ConnectionManager with queued message sending."""
 

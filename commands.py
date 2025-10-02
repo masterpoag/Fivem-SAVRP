@@ -5,7 +5,38 @@ import random as rand
 from termcolor import colored
 import basic_func as base
 import inspect
+import datetime
+from zoneinfo import ZoneInfo
 
+# Datetime functions for restart timer
+
+def next_restart_datetime():
+    """Return the next 7:00 AM CST datetime object."""
+    cst = ZoneInfo("America/Chicago")
+    now_cst = datetime.datetime.now(cst)
+
+    restart_dt = datetime.datetime.combine(
+        now_cst.date(),
+        datetime.time(7, 0, tzinfo=cst)
+    )
+
+    if restart_dt <= now_cst:
+        restart_dt += datetime.timedelta(days=1)
+
+    return restart_dt
+
+def time_until_restart():
+    """Return time left until next 7:00 AM CST as (hours, minutes, seconds)."""
+    now_utc = datetime.datetime.now(datetime.timezone.utc)
+    restart_dt = next_restart_datetime().astimezone(datetime.timezone.utc)
+
+    delta = restart_dt - now_utc
+    hours, remainder = divmod(int(delta.total_seconds()), 3600)
+    minutes, seconds = divmod(remainder, 60)
+    return hours, minutes, seconds
+
+# Global Variables
+key_start_time = None
 magicball = [
         "It is certain.",
         "It is decidedly so.",
@@ -78,11 +109,10 @@ movements = [
 ]
 divider = colored("--------------------------------------------------------\n", 'cyan', attrs=['bold'])
 
-
+# Setting up fivem connection
 cm =f.ConnectionManager()
 
-key_start_time = None
-
+# Command Functions
 
 def timer(e):
     global key_start_time
@@ -126,12 +156,14 @@ def bodyFidget(e):
     cm.send_message(f"{rand.choice(movements)}")
     print(divider)
 
+def showServerRestart(e):
+    print(colored(f"Key '{e.name}' Detected! Running: '{inspect.currentframe().f_code.co_name}'",'yellow'))
+    h, m, s = time_until_restart()
+    cm.send_message(f"me checks tsunami alert: {h}h {m}m")
 
 
 
-
-
-
+# Loading keybinds
 keyboard.on_release_key('f16', timer)
 keyboard.on_release_key('f17', bodyFidget)
 keyboard.on_release_key('f13', diceRoll)
@@ -139,10 +171,12 @@ keyboard.on_release_key('f14', coinflip)
 keyboard.on_release_key('f15', magic8ball)
 
 
+
+# Initial Script Load Message
 print(colored(base.box_text("Script Loaded."), 'green'))
 print(divider)
 
 
-
+# keep the script running
 keyboard.wait()
 
