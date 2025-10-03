@@ -12,9 +12,15 @@ if h.search_name(pd.read_csv(h.HOUSING_FILE)["House Name"].to_list()):
 price = float(df["Total Value or Daily Rent Price"].sum().replace(",","").replace("$",""))
 downpayment = float(df["Downpayment"].sum().replace(",","").replace("$",""))
 
+def payment_options(price: float, downpayment: float, interest: float, weeks: int):
+    total = price * (interest)
+    weekly = (total - downpayment) / weeks
+    return f"- {weeks} Weeks Total: {total:,.2f} | Per Week: {weekly:,.2f}"
+    
+
 
 print(f""" Base Price: {price:,.2f} | Downpayment: {downpayment:,.2f}
-- 4 Weeks Total: {(price*1.01):,.2f} | Per Week: {((price*1.01-downpayment)/4):,.2f}
-- 8 Weeks Total: {(price*1.03):,.2f} | Per Week: {((price*1.03-downpayment)/8):,.2f}
-- 12 Weeks Total: {(price*1.05):,.2f} | Per Week: {((price*1.05-downpayment)/12):,.2f}
-- 16 Weeks Total: {(price*1.07):,.2f} | Per Week: {((price*1.07-downpayment)/16):,.2f}""")
+{payment_options(price, downpayment, 1.01, 4)}
+{payment_options(price, downpayment, 1.03, 8)}
+{payment_options(price, downpayment, 1.05, 12)}
+{payment_options(price, downpayment, 1.07, 16)}""")

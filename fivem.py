@@ -4,6 +4,9 @@ import time
 from typing import Dict
 import queue
 
+
+LASTSENTMESSAGE = None
+
 """ Refactored ConnectionManager taken from github https://github.com/josh-tf/fxcommands/ 
 """
 
@@ -41,10 +44,12 @@ class ConnectionManager:
             time.sleep(0.05)  # small delay to prevent flooding
 
     def send_message(self, message: str, ip: str = "127.0.0.1", port: int = 29200, can_retry: bool = True):
+        global LASTSENTMESSAGE
         """Queue a message for sending."""
         print(f"Sending command: {message}")
         if message is None:
             return
+        LASTSENTMESSAGE = message
         self._message_queue.put((message, ip, port, can_retry))
 
     def _send_message_direct(self, message: str, ip: str, port: int, can_retry: bool):

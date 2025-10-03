@@ -8,7 +8,7 @@ import inspect
 import datetime
 from zoneinfo import ZoneInfo
 
-# Datetime functions for restart timer
+# Helper functions
 
 def next_restart_datetime():
     """Return the next 7:00 AM CST datetime object."""
@@ -34,6 +34,13 @@ def time_until_restart():
     hours, remainder = divmod(int(delta.total_seconds()), 3600)
     minutes, seconds = divmod(remainder, 60)
     return hours, minutes, seconds
+
+def suspense(timer=[1 + 0.25*i for i in range(int((2-0.5)/0.25))]):
+    timer = rand.choice(timer)
+    """Halts execution for a given range of seconds."""
+    print(colored(f"Suspending script for {timer} Seconds", 'yellow'))
+    time.sleep(timer)
+
 
 # Global Variables
 key_start_time = None
@@ -107,7 +114,7 @@ movements = [
     "me lifts one leg and balances.",
     "me jumps lightly in place."
 ]
-divider = colored("--------------------------------------------------------\n", 'cyan', attrs=['bold'])
+divider = colored("--------------------------------------------------------", 'cyan', attrs=['bold'])
 
 # Setting up fivem connection
 cm =f.ConnectionManager()
@@ -130,25 +137,38 @@ def timer(e):
 
 def diceRoll(e):
     print(colored(f"Key: '{e.name}' Detected! Running: '{inspect.currentframe().f_code.co_name}'",'yellow'))
-
+    
     roll = rand.randint(1, 20)
+
+    cm.send_message(f"me rolls a d20...")
+
+    suspense()
+    
     if roll == 20:
-        cm.send_message(f"me rolls a d20... natural 20! Critical Success!")
+        cm.send_message(f"me ~g~ Natural 20! Critical Success!")
     elif roll == 1:
-        cm.send_message(f"me rolls a d20... natural 1! Critical Failure!")
+        cm.send_message(f"me ~r~ Natural 1! Critical Failure!")
     else:
-        cm.send_message(f"me rolls a d20... {roll}.")
+        cm.send_message(f"me {roll}")
     print(divider)
 
 def magic8ball(e):
     print(colored(f"Key: '{e.name}' Detected! Running: '{inspect.currentframe().f_code.co_name}'",'yellow'))
     response = rand.choice(magicball)
-    cm.send_message(f"me shakes the magic 8-ball... '{response}'")
+
+    cm.send_message("me shakes the magic 8-ball...")
+
+    suspense()
+
+    cm.send_message(f"me '{response}'")
     print(divider)
 
 def coinflip(e):
     print(colored(f"Key: '{e.name}' Detected! Running: '{inspect.currentframe().f_code.co_name}'",'yellow'))
-    cm.send_message(f"me flips a coin... {rand.choice(['Heads', 'Tails'])}.")
+    cm.send_message("me flips a coin...")
+    suspense()
+
+    cm.send_message(f"me {rand.choice(['Heads', 'Tails'])}")
     print(divider)
 
 def bodyFidget(e):
@@ -159,7 +179,15 @@ def bodyFidget(e):
 def showServerRestart(e):
     print(colored(f"Key '{e.name}' Detected! Running: '{inspect.currentframe().f_code.co_name}'",'yellow'))
     h, m, s = time_until_restart()
-    cm.send_message(f"me checks tsunami alert: {h}h {m}m")
+    cm.send_message(f"e phone;me checks tsunami alert: {h}h {m}m")
+    print(divider)
+
+def resentMessage(e):
+    print(colored(f"Key '{e.name}' Detected! Running: '{inspect.currentframe().f_code.co_name}'",'yellow'))
+    if f.LASTSENTMESSAGE:
+        cm.send_message(f.LASTSENTMESSAGE)
+    else:
+        print(colored("No last message to resend.", 'red'))
 
 
 
@@ -169,7 +197,8 @@ keyboard.on_release_key('f17', bodyFidget)
 keyboard.on_release_key('f13', diceRoll)
 keyboard.on_release_key('f14', coinflip)
 keyboard.on_release_key('f15', magic8ball)
-
+keyboard.on_release_key('f18', showServerRestart)
+keyboard.on_release_key('f22', resentMessage)
 
 
 # Initial Script Load Message
