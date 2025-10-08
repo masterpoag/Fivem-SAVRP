@@ -41,6 +41,9 @@ def suspense(timer=[1 + 0.25*i for i in range(int((2-0.5)/0.25))]):
     print(colored(f"Suspending script for {timer} Seconds", 'yellow'))
     time.sleep(timer)
 
+def customtime(start: float, steps: int, step: float = .5):
+    return ([start + step*i for i in range(0,steps)])
+
 
 # Global Variables
 key_start_time = None
@@ -188,24 +191,64 @@ def resentMessage(e):
         cm.send_message(f.LASTSENTMESSAGE)
     else:
         print(colored("No last message to resend.", 'red'))
+    print(divider)
 
 
+def deathRoll(e):
+    print(colored(f"Key: '{e.name}' Detected! Running: '{inspect.currentframe().f_code.co_name}'",'yellow'))
+    print(colored("Price","blue"))
+    
+    user = input("> ")
+    
+    cm.send_message(f"me Starting Death Roll for ${int(user):,.0f}.")
+    iter = rand.randint(0,1) 
+
+    while int(user) > 1:
+        lastuser = user
+        user = rand.randint(1, int(user))
+
+        suspense(customtime(1.5,8,.25))
+
+        cm.send_message(f"me Rolls Dice: {user:,.0f} out of {lastuser:,.0f} for {'Player 1' if iter % 2 == 0 else 'Player 2'}")
+        
+        if user == 1:
+            suspense()
+            cm.send_message(f"me ~g~ Winner is: {'Player 1' if iter % 2 == 1 else 'Player 2'}")
+            break
+        
+        iter += 1
+
+    print(divider)
+
+
+# Set Debug
+
+DEBUG = False
 
 # Loading keybinds
-keyboard.on_release_key('f16', timer)
-keyboard.on_release_key('f17', bodyFidget)
-keyboard.on_release_key('f13', diceRoll)
-keyboard.on_release_key('f14', coinflip)
-keyboard.on_release_key('f15', magic8ball)
-keyboard.on_release_key('f18', showServerRestart)
-keyboard.on_release_key('f22', resentMessage)
+if not DEBUG:
+    keyboard.on_release_key('f16', timer)
+    keyboard.on_release_key('f17', bodyFidget)
+    keyboard.on_release_key('f13', diceRoll)
+    keyboard.on_release_key('f14', coinflip)
+    keyboard.on_release_key('f15', magic8ball)
+    keyboard.on_release_key('f18', showServerRestart)
+    keyboard.on_release_key('f22', resentMessage)
+    keyboard.on_release_key('f19', deathRoll)
 
 
-# Initial Script Load Message
-print(colored(base.box_text("Script Loaded."), 'green'))
-print(divider)
+    # Initial Script Load Message
+    print(colored(base.box_text("Script Loaded."), 'green'))
+    print(divider)
+
+if DEBUG:
+    print(colored(base.box_text("DEBUG MODE Loaded."), 'red'))
+    print(divider)
+
+    print(customtime(1.5,8,.25))
 
 
-# keep the script running
-keyboard.wait()
+if not DEBUG:
+    # keep the script running
+    keyboard.wait()
 
