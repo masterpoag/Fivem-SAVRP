@@ -209,7 +209,7 @@ def deathRoll(e):
 
         suspense(customtime(1.5,8,.25))
 
-        cm.send_message(f"me Rolls Dice: {user:,.0f} out of {lastuser:,.0f} for {'Player 1' if iter % 2 == 0 else 'Player 2'}")
+        cm.send_message(f"me Rolls Dice: {int(user):,.0f} out of {int(lastuser):,.0f} for {'Player 1' if iter % 2 == 0 else 'Player 2'}")
         
         if user == 1:
             suspense()
@@ -219,6 +219,49 @@ def deathRoll(e):
         iter += 1
 
     print(divider)
+
+def deathRollMulti(e):
+    print(colored(f"Key: '{e.name}' Detected! Running: '{inspect.currentframe().f_code.co_name}'",'yellow'))
+    print(colored("Price","blue"))
+    
+    user = input("> ")
+    print(colored("Players","blue"))
+    
+    users = input("> ")
+    
+    cm.send_message(f"me Starting Death Roll for ${int(user):,.0f}.")
+    
+    users = [f"Player {i+1}" for i in range(int(users))]
+    iter = rand.randint(0,2) 
+
+    while int(user) > 1:
+        lastuser = user
+        user = rand.randint(1, int(user))
+        iter = iter % len(users)
+
+        suspense(customtime(1.5,8,.25))
+
+        cm.send_message(f"me Rolls Dice: {int(user):,.0f} out of {int(lastuser):,.0f} for '{users[iter]}'")
+        
+
+        if user == 1:
+            if len(users) > 2:
+                suspense()
+                cm.send_message(f"me ~r~ '{users[iter]}' Has Been Removed.")
+            users.pop(iter)
+            user = 1000
+
+        if len(users) == 1:
+                suspense()
+                cm.send_message(f"me ~g~ Winner is: '{users[0]}'")
+                break
+    
+        iter += 1
+
+    print(divider)
+
+
+
 
 
 # Set Debug
@@ -235,6 +278,7 @@ if not DEBUG:
     keyboard.on_release_key('f18', showServerRestart)
     keyboard.on_release_key('f22', resentMessage)
     keyboard.on_release_key('f19', deathRoll)
+    keyboard.on_release_key('f20', deathRollMulti)
 
 
     # Initial Script Load Message
@@ -245,7 +289,6 @@ if DEBUG:
     print(colored(base.box_text("DEBUG MODE Loaded."), 'red'))
     print(divider)
 
-    print(customtime(1.5,8,.25))
 
 
 if not DEBUG:
