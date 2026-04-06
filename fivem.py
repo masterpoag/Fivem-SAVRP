@@ -10,6 +10,9 @@ LASTSENTMESSAGE = None
 """ Refactored ConnectionManager taken from github https://github.com/josh-tf/fxcommands/ 
 """
 
+MAX_RETRIES = 3
+
+
 class ConnectionManager:
     """Python equivalent of the C# ConnectionManager with queued message sending."""
 
@@ -67,9 +70,11 @@ class ConnectionManager:
             try_count += 1
             try:
                 sock = self._connect_if_needed(ip, port)
-                sock.sendall(data)
-                return
+                while try_count < MAX_RETRIES:
+                    sock.sendall(data)
+                    return
             except Exception as ex:
+                print(f"Failed to send queued message... error: {ex}")
                 with self._lock:
                     try:
                         existing = self._clients.get(key)
@@ -96,34 +101,9 @@ class ConnectionManager:
         return s
 
     def _connect_if_needed(self, ip: str, port: int) -> socket.socket:
-        key = self._client_key(ip, port)
-        with self._lock:
-            sock = self._clients.get(key)
-            if sock is None or sock.fileno() < 0:
-                try:
-                    if sock:
-                        sock.close()
-                except Exception:
-                    pass
-                sock = self._make_socket()
-                self._clients[key] = sock
-
-            try:
-                sock.getpeername()
-            except OSError:
-                try:
-                    sock.settimeout(self._connect_timeout)
-                    sock.connect((ip, port))
-                    sock.settimeout(None)
-                except Exception:
-                    try:
-                        sock.close()
-                    except Exception:
-                        pass
-                    sock = self._make_socket()
-                    self._clients[key] = sock
-                    raise
-            return sock
+        s = self._make_socket()
+        s.connect((ip, port))
+        return s
 
     def initialize_clients(self):
         with self._lock:
