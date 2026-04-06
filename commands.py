@@ -7,9 +7,17 @@ import basic_func as base
 import inspect
 import datetime
 from zoneinfo import ZoneInfo
+from reloading import reloading
+
 
 # Helper functions
+STOPPED = False
 
+
+MESSAGE_LIMIT = 8
+RESET_TIME = 5.3
+
+@reloading
 def next_restart_datetime():
     """Return the next 7:00 AM CST datetime object."""
     cst = ZoneInfo("America/Chicago")
@@ -24,7 +32,7 @@ def next_restart_datetime():
         restart_dt += datetime.timedelta(days=1)
 
     return restart_dt
-
+@reloading
 def time_until_restart():
     """Return time left until next 7:00 AM CST as (hours, minutes, seconds)."""
     now_utc = datetime.datetime.now(datetime.timezone.utc)
@@ -35,18 +43,21 @@ def time_until_restart():
     minutes, seconds = divmod(remainder, 60)
     return hours, minutes, seconds
 
+
+@reloading
 def suspense(timer=[1 + 0.25*i for i in range(int((2-0.5)/0.25))]):
     timer = rand.choice(timer)
     """Halts execution for a given range of seconds."""
     print(colored(f"Suspending script for {timer} Seconds", 'yellow'))
     time.sleep(timer)
-
+@reloading
 def customtime(start: float, steps: int, step: float = .5):
     return ([start + step*i for i in range(0,steps)])
 
 
 # Global Variables
 key_start_time = None
+
 magicball = [
         "It is certain.",
         "It is decidedly so.",
@@ -123,7 +134,7 @@ divider = colored("--------------------------------------------------------", 'c
 cm =f.ConnectionManager()
 
 # Command Functions
-
+@reloading
 def timer(e):
     global key_start_time
 
@@ -137,7 +148,7 @@ def timer(e):
         key_start_time = time.time()
         cm.send_message("me Starts Stopwatch.")
     print(divider)
-
+@reloading
 def diceRoll(e):
     print(colored(f"Key: '{e.name}' Detected! Running: '{inspect.currentframe().f_code.co_name}'",'yellow'))
     
@@ -154,7 +165,7 @@ def diceRoll(e):
     else:
         cm.send_message(f"me {roll}")
     print(divider)
-
+@reloading
 def magic8ball(e):
     print(colored(f"Key: '{e.name}' Detected! Running: '{inspect.currentframe().f_code.co_name}'",'yellow'))
     response = rand.choice(magicball)
@@ -165,7 +176,7 @@ def magic8ball(e):
 
     cm.send_message(f"me '{response}'")
     print(divider)
-
+@reloading
 def coinflip(e):
     print(colored(f"Key: '{e.name}' Detected! Running: '{inspect.currentframe().f_code.co_name}'",'yellow'))
     cm.send_message("me flips a coin...")
@@ -173,18 +184,18 @@ def coinflip(e):
 
     cm.send_message(f"me {rand.choice(['Heads', 'Tails'])}")
     print(divider)
-
+@reloading
 def bodyFidget(e):
     print(colored(f"Key '{e.name}' Detected! Running: '{inspect.currentframe().f_code.co_name}'",'yellow'))
     cm.send_message(f"{rand.choice(movements)}")
     print(divider)
-
+@reloading
 def showServerRestart(e):
     print(colored(f"Key '{e.name}' Detected! Running: '{inspect.currentframe().f_code.co_name}'",'yellow'))
     h, m, s = time_until_restart()
     cm.send_message(f"e phone;me checks tsunami alert: {h}h {m}m")
     print(divider)
-
+@reloading
 def resentMessage(e):
     print(colored(f"Key '{e.name}' Detected! Running: '{inspect.currentframe().f_code.co_name}'",'yellow'))
     if f.LASTSENTMESSAGE:
@@ -193,7 +204,9 @@ def resentMessage(e):
         print(colored("No last message to resend.", 'red'))
     print(divider)
 
+timer  = [3 + 0.05*i for i in range(int((1)/0.05))]
 
+@reloading
 def deathRoll(e):
     print(colored(f"Key: '{e.name}' Detected! Running: '{inspect.currentframe().f_code.co_name}'",'yellow'))
     print(colored("Price","blue"))
@@ -202,17 +215,23 @@ def deathRoll(e):
     
     cm.send_message(f"me Starting Death Roll for ${int(user):,.0f}.")
     iter = rand.randint(0,1) 
+    
+    i = 0
 
     while int(user) > 1:
         lastuser = user
         user = rand.randint(1, int(user))
-
-        suspense(customtime(1.5,8,.25))
+        i+= 1
+        if i % MESSAGE_LIMIT == 0:
+            print(colored(f"Message limit reached. Waiting.", 'red'))
+            suspense([RESET_TIME])
+        else:
+            suspense([RESET_TIME/MESSAGE_LIMIT])
 
         cm.send_message(f"me Rolls Dice: {int(user):,.0f} out of {int(lastuser):,.0f} for {'Player 1' if iter % 2 == 0 else 'Player 2'}")
         
         if user == 1:
-            suspense()
+            suspense([RESET_TIME])
             cm.send_message(f"me ~g~ Winner is: {'Player 1' if iter % 2 == 1 else 'Player 2'}")
             break
         
@@ -220,6 +239,7 @@ def deathRoll(e):
 
     print(divider)
 
+@reloading
 def deathRollMulti(e):
     print(colored(f"Key: '{e.name}' Detected! Running: '{inspect.currentframe().f_code.co_name}'",'yellow'))
     print(colored("Price","blue"))
@@ -239,20 +259,25 @@ def deathRollMulti(e):
         user = rand.randint(1, int(user))
         iter = iter % len(users)
 
-        suspense(customtime(1.5,8,.25))
+        i+= 1
+        if i % MESSAGE_LIMIT == 0:
+            print(colored(f"Message limit reached. Waiting.", 'red'))
+            suspense([RESET_TIME])
+        else:
+            suspense([RESET_TIME/MESSAGE_LIMIT])
 
         cm.send_message(f"me Rolls Dice: {int(user):,.0f} out of {int(lastuser):,.0f} for '{users[iter]}'")
         
 
         if user == 1:
             if len(users) > 2:
-                suspense()
+                suspense([RESET_TIME])
                 cm.send_message(f"me ~r~ '{users[iter]}' Has Been Removed.")
             users.pop(iter)
             user = 1000
 
         if len(users) == 1:
-                suspense()
+                suspense([RESET_TIME])
                 cm.send_message(f"me ~g~ Winner is: '{users[0]}'")
                 break
     
@@ -260,7 +285,10 @@ def deathRollMulti(e):
 
     print(divider)
 
-
+@reloading
+def test(e):
+    print(colored(f"Key: '{e.name}' Detected! Running: '{inspect.currentframe().f_code.co_name}'",'yellow'))
+    cm.send_message(f"me test")
 
 
 
@@ -279,7 +307,8 @@ if not DEBUG:
     keyboard.on_release_key('f22', resentMessage)
     keyboard.on_release_key('f19', deathRoll)
     keyboard.on_release_key('f20', deathRollMulti)
-
+    keyboard.on_release_key('f21', test)
+    keyboard.on_release_key('f23', lambda e: print(colored("F23 Pressed. Exiting Script.", 'red')) or exit(1) or setattr(STOPPED, True))
 
     # Initial Script Load Message
     print(colored(base.box_text("Script Loaded."), 'green'))
@@ -290,8 +319,8 @@ if DEBUG:
     print(divider)
 
 
-
 if not DEBUG:
     # keep the script running
-    keyboard.wait()
+    if not STOPPED:
+        keyboard.wait()
 

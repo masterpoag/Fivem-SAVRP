@@ -27,6 +27,13 @@ def update_CSV() -> pd.DataFrame:
         return None
 
 
+def temp(name):
+    valid_names = pd.read_csv(HOUSING_FILE)["Owned Name"].dropna().to_list()
+    return name in valid_names
+
+
+
+
 def search_name(valid_names="") -> bool:
     """Searches for a name in the spreadsheet that the user requests if found stores it in USER"""
     global USER
@@ -47,7 +54,6 @@ def autocorrect_name(input_name, threshold=70, valid_names=None) -> str:
             return "No Results Found"
         valid_names = pd.read_csv(HOUSING_FILE)["Owned Name"].dropna().to_list()
     match, score = process.extractOne(input_name, valid_names)
-    print(threshold)
     return match if score >= threshold else "No Results Found"
 
 
