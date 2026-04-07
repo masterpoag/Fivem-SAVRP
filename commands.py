@@ -32,6 +32,7 @@ def next_restart_datetime():
         restart_dt += datetime.timedelta(days=1)
 
     return restart_dt
+
 @reloading
 def time_until_restart():
     """Return time left until next 7:00 AM CST as (hours, minutes, seconds)."""
@@ -50,6 +51,7 @@ def suspense(timer=[1 + 0.25*i for i in range(int((2-0.5)/0.25))]):
     """Halts execution for a given range of seconds."""
     print(colored(f"Suspending script for {timer} Seconds", 'yellow'))
     time.sleep(timer)
+
 @reloading
 def customtime(start: float, steps: int, step: float = .5):
     return ([start + step*i for i in range(0,steps)])
@@ -148,6 +150,7 @@ def timer(e):
         key_start_time = time.time()
         cm.send_message("me Starts Stopwatch.")
     print(divider)
+
 @reloading
 def diceRoll(e):
     print(colored(f"Key: '{e.name}' Detected! Running: '{inspect.currentframe().f_code.co_name}'",'yellow'))
@@ -165,6 +168,7 @@ def diceRoll(e):
     else:
         cm.send_message(f"me {roll}")
     print(divider)
+
 @reloading
 def magic8ball(e):
     print(colored(f"Key: '{e.name}' Detected! Running: '{inspect.currentframe().f_code.co_name}'",'yellow'))
@@ -176,6 +180,7 @@ def magic8ball(e):
 
     cm.send_message(f"me '{response}'")
     print(divider)
+
 @reloading
 def coinflip(e):
     print(colored(f"Key: '{e.name}' Detected! Running: '{inspect.currentframe().f_code.co_name}'",'yellow'))
@@ -184,17 +189,20 @@ def coinflip(e):
 
     cm.send_message(f"me {rand.choice(['Heads', 'Tails'])}")
     print(divider)
+
 @reloading
 def bodyFidget(e):
     print(colored(f"Key '{e.name}' Detected! Running: '{inspect.currentframe().f_code.co_name}'",'yellow'))
     cm.send_message(f"{rand.choice(movements)}")
     print(divider)
+
 @reloading
 def showServerRestart(e):
     print(colored(f"Key '{e.name}' Detected! Running: '{inspect.currentframe().f_code.co_name}'",'yellow'))
     h, m, s = time_until_restart()
     cm.send_message(f"e phone;me checks tsunami alert: {h}h {m}m")
     print(divider)
+
 @reloading
 def resentMessage(e):
     print(colored(f"Key '{e.name}' Detected! Running: '{inspect.currentframe().f_code.co_name}'",'yellow'))
@@ -248,33 +256,37 @@ def deathRollMulti(e):
     print(colored("Players","blue"))
     
     users = input("> ")
-    
+    reset_amount = int(int(user)/2)
     cm.send_message(f"me Starting Death Roll for ${int(user):,.0f}.")
     
     users = [f"Player {i+1}" for i in range(int(users))]
     iter = rand.randint(0,2) 
-
-    while int(user) > 1:
+    i = 0
+    while int(user) >= 1:
         lastuser = user
         user = rand.randint(1, int(user))
         iter = iter % len(users)
-
         i+= 1
         if i % MESSAGE_LIMIT == 0:
             print(colored(f"Message limit reached. Waiting.", 'red'))
             suspense([RESET_TIME])
         else:
             suspense([RESET_TIME/MESSAGE_LIMIT])
-
+            pass
+        
         cm.send_message(f"me Rolls Dice: {int(user):,.0f} out of {int(lastuser):,.0f} for '{users[iter]}'")
         
 
-        if user == 1:
-            if len(users) > 2:
-                suspense([RESET_TIME])
-                cm.send_message(f"me ~r~ '{users[iter]}' Has Been Removed.")
+        if user == 1 and len(users) >= 2:
+            suspense([RESET_TIME])
+            cm.send_message(f"me ~r~ '{users[iter]}' Has Been Removed.")
             users.pop(iter)
-            user = 1000
+            user = reset_amount
+            if len(users) != 1:
+                suspense([RESET_TIME/MESSAGE_LIMIT])
+                cm.send_message(f"me ~y~ Setting Roll to {reset_amount}.")
+            reset_amount = int(reset_amount/2)
+            i+= 1
 
         if len(users) == 1:
                 suspense([RESET_TIME])
@@ -287,8 +299,7 @@ def deathRollMulti(e):
 
 @reloading
 def test(e):
-    print(colored(f"Key: '{e.name}' Detected! Running: '{inspect.currentframe().f_code.co_name}'",'yellow'))
-    cm.send_message(f"me test")
+    print(MESSAGE_LIMIT)
 
 
 
